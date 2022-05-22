@@ -68,11 +68,11 @@ class StoryList {
    * - user - the current instance of User who will post the story
    * - obj of {title, author, url}
    *
-   * Returns the new Story instance
+   *
    */
 
   async addStory(token, newStory) {
-    const response = await axios.post(`${BASE_URL}/stories`, {
+    await axios.post(`${BASE_URL}/stories`, {
       token,
       story: {
         title: newStory.title,
@@ -80,17 +80,27 @@ class StoryList {
         url: newStory.url,
       },
     });
-
-    return new Story(response.data.story);
   }
 
+  //takes a user token and a storyId and sends a delete request to the API to delete the story
   async removeStory(token, storyId) {
-    const response = await axios.delete(`${BASE_URL}/stories/${storyId}`, {
+    await axios.delete(`${BASE_URL}/stories/${storyId}`, {
       data: {
         token,
       },
     });
-    console.log(response);
+  }
+
+  //takes a user token and a storyChanges object of {storyId,title,author,url} and sends a patch request to the API to update the story
+  async editStory(token, storyChanges) {
+    await axios.patch(`${BASE_URL}/stories/${storyChanges.storyId}`, {
+      token,
+      story: {
+        title: storyChanges.title,
+        author: storyChanges.author,
+        url: storyChanges.url,
+      },
+    });
   }
 }
 
@@ -132,20 +142,26 @@ class User {
       url: `${BASE_URL}/signup`,
       method: "POST",
       data: { user: { username, password, name } },
+    }).catch(() => {
+      alert(
+        "That username has already been taken! Please enter a different username"
+      );
     });
 
-    let { user } = response.data;
+    if (response) {
+      let { user } = response.data;
 
-    return new User(
-      {
-        username: user.username,
-        name: user.name,
-        createdAt: user.createdAt,
-        favorites: user.favorites,
-        ownStories: user.stories,
-      },
-      response.data.token
-    );
+      return new User(
+        {
+          username: user.username,
+          name: user.name,
+          createdAt: user.createdAt,
+          favorites: user.favorites,
+          ownStories: user.stories,
+        },
+        response.data.token
+      );
+    }
   }
 
   /** Login in user with API, make User instance & return it.
@@ -159,19 +175,24 @@ class User {
       url: `${BASE_URL}/login`,
       method: "POST",
       data: { user: { username, password } },
+    }).catch(() => {
+      alert("Incorrect Password!");
     });
-    let { user } = response.data;
 
-    return new User(
-      {
-        username: user.username,
-        name: user.name,
-        createdAt: user.createdAt,
-        favorites: user.favorites,
-        ownStories: user.stories,
-      },
-      response.data.token
-    );
+    if (response) {
+      let { user } = response.data;
+
+      return new User(
+        {
+          username: user.username,
+          name: user.name,
+          createdAt: user.createdAt,
+          favorites: user.favorites,
+          ownStories: user.stories,
+        },
+        response.data.token
+      );
+    }
   }
 
   /** When we already have credentials (token & username) for a user,
@@ -204,16 +225,38 @@ class User {
     }
   }
 
+  //get updated user info from the API
+  static async updateUser() {
+    if (currentUser) {
+      const response = await axios({
+        url: `${BASE_URL}/users/${currentUser.username}`,
+        method: "GET",
+        params: { token: currentUser.loginToken },
+      });
+
+      let { user } = response.data;
+
+      return new User(
+        {
+          username: user.username,
+          name: user.name,
+          createdAt: user.createdAt,
+          favorites: user.favorites,
+          ownStories: user.stories,
+        },
+        currentUser.loginToken
+      );
+    }
+  }
+
   //adds a story to the favorites list
-  async addFavorite(story) {
+  async addFavorite(storyId) {
     await axios.post(
-      `${BASE_URL}/users/${currentUser.username}/favorites/${story.storyId}`,
+      `${BASE_URL}/users/${currentUser.username}/favorites/${storyId}`,
       {
         token: currentUser.loginToken,
       }
     );
-
-    this.favorites.push(story);
   }
 
   //removes a story from the favorites list
@@ -222,11 +265,5 @@ class User {
       `${BASE_URL}/users/${currentUser.username}/favorites/${storyId}`,
       { data: { token: currentUser.loginToken } }
     );
-
-    this.favorites.forEach((story, idx) => {
-      if (story.storyId === storyId) {
-        this.favorites.splice(idx);
-      }
-    });
   }
 }

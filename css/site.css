@@ -107,9 +107,7 @@ form > hr {
   border: 1px solid lightgray;
 }
 
-.login-input label {
-  width: 70px;
-}
+
 
 
 /* responsive queries for tightening things up for mobile. */

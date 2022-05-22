@@ -12,3 +12,31 @@
 .account-forms-container {
   padding-left: 20px;
 }
+
+.login-input label {
+  width: 70px;
+}
+
+/* submit story form */
+
+.story-input label {
+  width: 100px;
+  margin-right:10px;
+}
+
+.story-input {
+  display: flex;
+  align-items: center;
+  width: 470px;
+}
+
+#story-form-button {
+  width: 316px;
+  margin-left: 110px;
+  
+}
+
+.story-forms-container {
+  align-items: center;
+  text-align: center;
+}

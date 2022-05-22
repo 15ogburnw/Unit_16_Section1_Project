@@ -47,9 +47,18 @@ i {
 a.story-remove {
   color: red;
   font-size: 0.8rem;
-  margin: 0px 10px;
+  border: red 1px solid;
+  border-radius: 3px;
+  padding: 4px;
 }
 
-a.story-remove:hover {
-  text-decoration: underline;
+
+a.story-edit {
+  font-size: 0.8rem;
+  margin: 0px 10px;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 4px;
 }
+
+
